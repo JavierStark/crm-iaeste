@@ -9,12 +9,11 @@ git remote add upstream https://github.com/JavierStark/crm-iaeste.git
 # Cada vez que quieras actualizar
 git fetch upstream
 git merge upstream/main          # si tocaste código, aquí puede haber conflictos que resolver
-npm install
-npx supabase db push             # aplica las migraciones nuevas a tu Supabase
 git push                         # Vercel vuelve a desplegar solo
 ```
 
-- Si el `CHANGELOG` dice que hay **migraciones nuevas**, el paso `db push` es obligatorio: sin él la web nueva puede esperar tablas o funciones que aún no existen.
+- **Migraciones:** si desplegaste con el botón (integración de Supabase) o tienes `SUPABASE_DB_URL` en Vercel, el despliegue de producción las aplica solo antes de publicar la web. Si no, ejecuta `npx supabase db push` antes del `git push`: sin él la web nueva puede esperar tablas o funciones que aún no existen.
+- Sin terminal: en GitHub, *Sync fork* no sirve para copias hechas desde un template. Lo más sencillo es pedir a alguien con Git que haga estos pasos una vez por versión.
 - Si solo usas Ajustes y no has editado ficheros del código, el `merge` no tiene conflictos.
 - Antes de actualizar en producción puedes probarlo en local: `npm run db:reset && npm run db:test` (ver el README).
 

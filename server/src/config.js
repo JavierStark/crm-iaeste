@@ -1,7 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 
 const falta = (n) => { throw new Error(`Falta la variable de entorno ${n} (ver server/.env.example)`) }
-const req = (n) => process.env[n] || falta(n)
 const num = (n, d) => (process.env[n] ? Number(process.env[n]) : d)
 const bool = (n, d) => (process.env[n] === undefined ? d : process.env[n] === 'true')
 
@@ -10,9 +9,10 @@ export const config = {
   // Orígenes del frontend autorizados (separados por comas)
   corsOrigins: (process.env.CORS_ORIGINS || 'http://localhost:5174').split(',').map((s) => s.trim()),
 
-  // En Vercel vale la misma URL que usa el frontend: no hace falta repetirla
-  supabaseUrl: process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || falta('SUPABASE_URL'),
-  supabaseServiceKey: req('SUPABASE_SERVICE_ROLE_KEY'),
+  // En Vercel vale la misma URL que usa el frontend: no hace falta repetirla. SUPABASE_SECRET_KEY y
+  // NEXT_PUBLIC_SUPABASE_URL son los nombres que pone la integración de Supabase en Vercel.
+  supabaseUrl: process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || falta('SUPABASE_URL'),
+  supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || falta('SUPABASE_SERVICE_ROLE_KEY'),
 
   // Opcionales: sin ellas la API arranca igual, pero no envía ni lee correos (ver correoConfigurado)
   gmailUser: (process.env.GMAIL_USER || '').trim().toLowerCase(),

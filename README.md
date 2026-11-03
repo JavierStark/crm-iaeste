@@ -2,11 +2,11 @@
 
 Aplicación web para gestionar el contacto con empresas de un comité: quién habla con quién, en qué punto está cada conversación, cuándo toca el siguiente seguimiento, plantillas de correo compartidas y, si se quiere, una puntuación de campaña con clasificación del equipo.
 
-Es un **template**: pulsa **Use this template** en GitHub para tener tu propia copia y despliégala con tu propio Vercel y tu propio Supabase (ver [«Montar el CRM para un centro nuevo»](#montar-el-crm-para-un-centro-nuevo)). Los datos de cada centro quedan en su Supabase; no hay ningún servidor compartido. **Todo lo que cambia de un centro a otro se configura desde el propio CRM** (pestaña **Ajustes**, solo admins), sin tocar código:
+Es un **template**: cada centro tiene su propia copia, su propio Vercel y su propio Supabase (ver [«Montar el CRM para un centro nuevo»](#montar-el-crm-para-un-centro-nuevo)). Los datos de cada centro quedan en su Supabase; no hay ningún servidor compartido. **Todo lo que cambia de un centro a otro se configura desde el propio CRM** (pestaña **Ajustes**, solo admins), sin tocar código:
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FJavierStark%2Fcrm-iaeste&env=VITE_SUPABASE_URL,VITE_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY&envDescription=Las%20tres%20est%C3%A1n%20en%20el%20archivo%20.env.vercel%20que%20genera%20npm%20run%20setup&envLink=https%3A%2F%2Fgithub.com%2FJavierStark%2Fcrm-iaeste%23desplegar-desde-cero-supabase--vercel)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FJavierStark%2Fcrm-iaeste&project-name=crm-centro&repository-name=crm-centro&integration-ids=oac_VqOgBHqhEoFTPzGkPd7L0iH6&env=ADMIN_EMAIL&envDescription=Tu+email%3A+ser%C3%A1+el+%C3%BAnico+que+entre+como+admin+del+CRM&envLink=https%3A%2F%2Fgithub.com%2FJavierStark%2Fcrm-iaeste%23despliegue-en-un-clic)
 
-> Crea antes el Supabase con `npm run setup`: el botón te pedirá las tres variables que deja en `.env.vercel`. Las del Gmail (correo) son opcionales y se añaden después.
+> **Un clic, sin terminal:** el botón copia el repo a tu GitHub, crea tu Supabase con la integración oficial, aplica la base de datos y publica la web. Solo pide tu email (el del admin). Ver [«Despliegue en un clic»](#despliegue-en-un-clic).
 
 | En Ajustes | Qué se cambia |
 |---|---|
@@ -104,23 +104,42 @@ npm run correo           # http://localhost:8788 — en local envía a Mailpit
 
 ## Montar el CRM para un centro nuevo
 
-Unos 20 minutos. Cada centro tiene su propio Supabase (sus datos) y su propio proyecto de Vercel (su web), cada uno desde su copia del template.
+Cada centro tiene su propio Supabase (sus datos) y su propio proyecto de Vercel (su web), cada uno desde su copia del template.
 
-0. **Tu copia**: en GitHub, **Use this template → Create a new repository** (puede ser privado). Clónala y ejecuta `npm install`.
-1. **Supabase y Vercel**: sigue «Desplegar desde cero» (abajo) con un proyecto nuevo de cada; `npm run setup` hace la parte de la base de datos.
-2. **Primer admin**: regístrate en la web nueva con el email que diste en `npm run setup`; solo ese email entra como admin, aunque otra persona se registre antes.
+1. **Desplegar**: con el botón de arriba ([«Despliegue en un clic»](#despliegue-en-un-clic), unos 5 minutos y sin terminal) o a mano ([«Desplegar desde cero»](#desplegar-desde-cero-supabase--vercel), con `npm run setup`).
+2. **Primer admin**: regístrate en la web nueva con el email que diste (`ADMIN_EMAIL` o `npm run setup`); solo ese email entra como admin, aunque otra persona se registre antes.
 3. **Ajustes**: entra en la pestaña **Ajustes** y rellena nombre, logo y color; apaga lo que el centro no quiera (por defecto la **puntuación está apagada**); añade sus subcentros si los tiene.
    - Si el centro quiere puntuación, enciéndela en Funciones y edita la rúbrica en Ajustes → Puntuación: parte de la de ejemplo, **Empezar de cero**, o **Copia de seguridad → Cargar desde archivo** con la de otro centro.
 4. **Plantillas**: la base trae una plantilla de primer contacto genérica con `{{empresa}}`, `{{contacto}}` y `{{yo}}`; edítala o bórrala en la pestaña Plantillas.
-5. **Buzón**: si usan correo, crea su Gmail compartido y pon `GMAIL_USER` / `GMAIL_APP_PASSWORD` en Vercel (ver [`server/README.md`](server/README.md)); ese mismo Gmail sirve de SMTP para Supabase Auth (paso 4 de abajo). Si no, apaga «Correo con las empresas» en Ajustes. Ajustes → Funciones y Ajustes → Correo avisan si el correo está encendido pero el servidor no tiene buzón.
+5. **Buzón**: si usan correo, crea su Gmail compartido y pon `GMAIL_USER` / `GMAIL_APP_PASSWORD` en Vercel (ver [`server/README.md`](server/README.md)); ese mismo Gmail sirve de SMTP para Supabase Auth. Si no, apaga «Correo con las empresas» en Ajustes. Ajustes → Funciones y Ajustes → Correo avisan si el correo está encendido pero el servidor no tiene buzón.
 6. Pásales el enlace de registro (`https://<su-web>/?registro`) y reparte empresas desde Equipo.
 
 Ningún paso requiere tocar código. Lo único que sigue en código son los **estados** del pipeline (sus ids están en la base de datos; los nombres sí se cambian en Ajustes).
 
+## Despliegue en un clic
+
+1. Pulsa **Deploy with Vercel** (arriba). Vercel te pide:
+   - **GitHub:** dónde crear tu copia del repo (puede ser privada).
+   - **Supabase:** la integración oficial crea un proyecto nuevo (elige la región más cercana) y pone sus claves en Vercel. Se factura a través de Vercel; el plan gratuito basta para empezar.
+   - **`ADMIN_EMAIL`:** tu email. Será el único que entre como admin.
+2. Vercel despliega. En cada despliegue de **producción**, `scripts/vercel-build.mjs` aplica las migraciones pendientes a tu Supabase y guarda el admin inicial antes de compilar la web. Si una migración falla, el despliegue falla y sigue publicada la versión anterior. Los despliegues de *preview* no tocan la base de datos.
+3. **Ajustes de Supabase Auth** (Site URL, hook de correos desechables, contraseñas y SMTP). Elige una:
+   - **Automático:** crea un token en [supabase.com/dashboard/account/tokens](https://supabase.com/dashboard/account/tokens), añádelo en Vercel como `SUPABASE_ACCESS_TOKEN` y vuelve a desplegar (*Deployments → Redeploy*). El build configura todo lo que siga con los valores de fábrica, y si están `GMAIL_USER` y `GMAIL_APP_PASSWORD`, pone ese Gmail como SMTP. Después **borra el token**: da acceso a todos tus proyectos de Supabase y solo hacía falta una vez.
+   - **A mano:** los pasos 3 y 4 de [«Desplegar desde cero»](#desplegar-desde-cero-supabase--vercel).
+
+   Sin esto, el registro funciona, pero el enlace del correo de confirmación lleva a `localhost` (la cuenta queda confirmada igualmente) y Supabase solo envía unos pocos correos por hora.
+4. **Correo (opcional):** añade `GMAIL_USER` y `GMAIL_APP_PASSWORD` en Vercel y vuelve a desplegar (ver [`server/README.md`](server/README.md)).
+5. Abre la web, regístrate con tu email y configura el centro en **Ajustes**.
+
+El log del build (*Deployments → el despliegue → Build Logs*) dice qué ha hecho y qué queda pendiente. Las variables que pone la integración se leen tal cual (`SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` o `SUPABASE_ANON_KEY`, `SUPABASE_SECRET_KEY` o `SUPABASE_SERVICE_ROLE_KEY`, `POSTGRES_URL_NON_POOLING` y sus variantes `NEXT_PUBLIC_*`; ver `scripts/entorno.mjs`): no hay que copiar ni renombrar ninguna. Si conectas un Supabase que ya tenías sin la integración, define `SUPABASE_DB_URL` (la cadena de conexión *Session pooler* de *Project Settings → Database*) para que el build pueda migrar.
+
 ## Desplegar desde cero (Supabase + Vercel)
 
+Sin integración, con tu cuenta de Supabase y la terminal.
+
+
 1. **Supabase:** crea un proyecto vacío en [supabase.com](https://supabase.com) y guarda la contraseña de la base de datos. En una terminal del repo ejecuta `npm run setup`: pide la referencia del proyecto y tu email (el del admin), inicia sesión, enlaza, aplica las migraciones (**no** carga el seed), guarda tu email como admin inicial y escribe **`.env.vercel`** con las variables para Vercel. Ese archivo lleva la `service_role` key: no se sube al repo (`.gitignore`) y conviene borrarlo después de usarlo.
-2. **Vercel:** importa el repo (detecta Vite) o usa el botón de arriba, y pega el contenido de `.env.vercel` en *Settings → Environment Variables* (acepta pegar el archivo entero). Son tres: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` y `SUPABASE_SERVICE_ROLE_KEY` (**secreta**). Para el correo, añade `GMAIL_USER`, `GMAIL_APP_PASSWORD` y, opcional, `MAIL_FROM_NAME` (ver [`server/README.md`](server/README.md)); sin ellas el CRM funciona, pero no envía correos.
+2. **Vercel:** importa tu copia del repo (*Add New → Project*; detecta Vite) y pega el contenido de `.env.vercel` en *Settings → Environment Variables* (acepta pegar el archivo entero). Son tres: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` y `SUPABASE_SERVICE_ROLE_KEY` (**secreta**). Para el correo, añade `GMAIL_USER`, `GMAIL_APP_PASSWORD` y, opcional, `MAIL_FROM_NAME` (ver [`server/README.md`](server/README.md)); sin ellas el CRM funciona, pero no envía correos.
    La API de correo corre en el mismo proyecto como función serverless (`api/index.js`), así que no hace falta otro hosting. No definas `VITE_EMAIL_API_URL`: sin ella el navegador usa `/api/...` del mismo dominio. Los correos entrantes **no se leen en segundo plano**: se buscan en Gmail cuando alguien abre los correos de una empresa o pulsa el botón de actualizar.
 3. **Supabase → Authentication:**
    - **URL Configuration:** la URL de Vercel como *Site URL* y en *Redirect URLs* (para confirmar cuentas y recuperar contraseñas).
@@ -153,6 +172,8 @@ server/                      servicio de correo SMTP/IMAP (Node)
 supabase/seed.sql            datos de prueba SOLO para local
 supabase/config.toml         configuración del Supabase local
 scripts/setup.mjs            prepara el Supabase de un centro nuevo y genera .env.vercel (`npm run setup`)
+scripts/vercel-build.mjs     build de Vercel: migraciones, admin inicial y Auth antes de compilar
+scripts/entorno.mjs          nombres de variables aceptados (los nuestros y los de la integración)
 scripts/env-local.mjs        genera .env.development.local
 scripts/smoke-test.mjs       prueba de humo de la base de datos
 ```
