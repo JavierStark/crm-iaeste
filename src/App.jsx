@@ -1422,7 +1422,7 @@ const signo = (n) => `${n > 0 ? '+' : ''}${fmtPts(n)}`
 function Desglose({ apuntes, auto, onEditar, onBorrar, onAjustar, onEmpresa }) {
   const hayAuto = auto?.filas?.length > 0
   let grupos = agruparPorCategoria(apuntes)
-  // Los puntos automáticos de empresas son parte de CAT_GT (en Málaga, H. GT Empresas): van dentro de ese grupo
+  // Los puntos automáticos de empresas son parte de CAT_GT (en la rúbrica de ejemplo, H. Empresas): van dentro de ese grupo
   if (hayAuto) {
     const h = grupos.find((g) => g.cat === CAT_GT)
     if (h) h.subtotal += auto.puntos

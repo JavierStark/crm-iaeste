@@ -39,7 +39,7 @@ if (!existsSync('server/.env') && vars.SERVICE_ROLE_KEY) {
     `SUPABASE_URL=${url}`,
     `SUPABASE_SERVICE_ROLE_KEY=${vars.SERVICE_ROLE_KEY}`,
     `SUPABASE_ANON_KEY=${key}`, // solo lo usan los tests de server/
-    'GMAIL_USER=crm.local@iaeste.test',
+    'GMAIL_USER=crm.local@demo.test',
     'GMAIL_APP_PASSWORD=sin-usar-en-local',
     'SMTP_HOST=127.0.0.1',
     'SMTP_PORT=55325',

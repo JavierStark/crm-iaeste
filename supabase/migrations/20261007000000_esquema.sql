@@ -1,5 +1,5 @@
 -- ============================================================
--- CRM IAESTE — Esquema completo
+-- CRM de empresas — Esquema completo
 --
 -- Local:      `npm run db:reset` lo aplica (junto con seed.sql) sobre la base local.
 -- Producción: `npx supabase link` + `npx supabase db push`, o pega las migraciones en

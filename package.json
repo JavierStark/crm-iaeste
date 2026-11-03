@@ -2,6 +2,7 @@
   "name": "crm-centros",
   "private": true,
   "version": "1.0.0",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,6 +16,7 @@
     "db:reset": "supabase db reset",
     "db:status": "supabase status",
     "db:env": "node scripts/env-local.mjs",
+    "setup": "node scripts/setup.mjs",
     "db:new-migration": "supabase migration new",
     "db:test": "node scripts/smoke-test.mjs",
     "correo": "npm --prefix server start",

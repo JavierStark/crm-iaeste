@@ -10,7 +10,7 @@
 -- ------------------------------------------------------------
 -- Se elige al registrarse; los admins lo cambian en Equipo. Nulo en las cuentas anteriores a esta migración.
 alter table public.profiles
-  add column centro text check (centro in ('IDML', 'IFML', 'QMML', 'AQML', 'TLML'));
+  add column centro text check (centro in ('ING', 'CIE', 'ECO', 'ART', 'SAL'));
 
 -- Alta automática de perfil: ahora lee también el centro (solo si es uno de los cinco válidos).
 create or replace function public.handle_new_user()
@@ -27,7 +27,7 @@ begin
     new.id,
     coalesce(nullif(btrim(new.raw_user_meta_data ->> 'nombre'), ''), split_part(new.email, '@', 1)),
     case when not exists (select 1 from public.profiles) then 'admin' else 'miembro' end,
-    case when v_centro in ('IDML', 'IFML', 'QMML', 'AQML', 'TLML') then v_centro end
+    case when v_centro in ('ING', 'CIE', 'ECO', 'ART', 'SAL') then v_centro end
   );
   return new;
 end;
@@ -44,7 +44,7 @@ create table public.puntos (
   id bigint generated always as identity primary key,
   usuario_id uuid references public.profiles (id) on delete cascade,
   socio_nombre text,
-  socio_centro text check (socio_centro in ('IDML', 'IFML', 'QMML', 'AQML', 'TLML')),
+  socio_centro text check (socio_centro in ('ING', 'CIE', 'ECO', 'ART', 'SAL')),
   fecha date not null default current_date,
   categoria text not null check (categoria in ('INI', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M')),
   concepto text not null check (length(btrim(concepto)) between 1 and 60),

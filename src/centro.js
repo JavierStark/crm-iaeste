@@ -6,9 +6,9 @@ import { supabase } from './supabase'
 
 export const DEFECTO = {
   // ---------- Textos e imagen ----------
-  nombre: 'Mi centro',              // nombre completo («IAESTE Málaga»): textos, buzón y remitente de correo
-  nombreCorto: 'CRM',               // texto junto al icono si no hay logo («IAESTE»)
-  lugar: '',                        // línea bajo el logo en la barra lateral: «Málaga» → «MÁLAGA · CRM»
+  nombre: 'Mi centro',              // nombre completo («Mi centro»): textos, buzón y remitente de correo
+  nombreCorto: 'CRM',               // texto junto al icono si no hay logo («CRM»)
+  lugar: '',                        // línea bajo el logo en la barra lateral: «Sevilla» → «SEVILLA · CRM»
   tituloApp: 'CRM de empresas',     // pestaña del navegador y cabecera en móvil
   equipo: 'el equipo de empresas',  // «El CRM de <equipo> de <nombre>»
   descripcion: '',                  // texto de la pantalla de entrada (vacío = uno genérico)

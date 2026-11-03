@@ -6,7 +6,7 @@
 import { CENTRO } from './centro'
 import { RUBRICA_EJEMPLO } from './rubricaEjemplo'
 
-// Puntos de la categoría de empresas para el nivel «Mínimo» (en Málaga, 30: optar a prácticas en primer plazo)
+// Puntos de la categoría de empresas para el nivel «Mínimo» (por defecto 30)
 export const MINIMO_GT_EMPRESAS = CENTRO.puntos.minimoGt
 
 export const NIVELES = ['Pendiente', 'Mínimo', 'Práctica'] // índice = nivel
@@ -69,7 +69,7 @@ export const num = (x) => {
 }
 
 // ---------- Campañas (años naturales, de enero a diciembre) ----------
-export const PRIMERA_CAMPANA = CENTRO.puntos.primeraCampana // la primera con datos (en Málaga, la 2026, importada del Excel)
+export const PRIMERA_CAMPANA = CENTRO.puntos.primeraCampana // la primera con datos
 export const PRIMERA_CAMPANA_CRM = CENTRO.puntos.primeraCampana // desde ahí hay además puntos automáticos por empresas del CRM
 
 export function campana(anio) {

@@ -30,7 +30,7 @@ console.log(`
   Supabase Studio:   http://127.0.0.1:55323
   Mailpit (correos): http://127.0.0.1:55324
   Servicio de correo: http://localhost:8788
-  Usuarios de prueba: ana@iaeste.test / Admin1234 (admin) · marta@iaeste.test / Miembro1234
+  Usuarios de prueba: ana@demo.test / Admin1234 (admin) · marta@demo.test / Miembro1234
   Ctrl+C para apagarlo todo.
 `)
 

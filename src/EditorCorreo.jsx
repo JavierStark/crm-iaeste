@@ -36,7 +36,7 @@ const EditorCorreo = forwardRef(function EditorCorreo({ valor, onChange, placeho
     const el = caja.current
     if (!avisarImagenes) return
     const fallo = (e) => {
-      if (e.target.tagName === 'IMG') onAviso?.('Alguna imagen no se puede mostrar aquí. Si está en Google Drive, Gmail sí la enseña pero otros correos puede que no: es más seguro alojarla en una web (p. ej. la de IAESTE) y usar esa dirección.')
+      if (e.target.tagName === 'IMG') onAviso?.('Alguna imagen no se puede mostrar aquí. Si está en Google Drive, Gmail sí la enseña pero otros correos puede que no: es más seguro alojarla en una web (p. ej. la de tu centro) y usar esa dirección.')
     }
     el.addEventListener('error', fallo, true) // los errores de carga no burbujean: se escuchan en captura
     return () => el.removeEventListener('error', fallo, true)

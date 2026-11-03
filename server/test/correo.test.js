@@ -41,11 +41,11 @@ after(() => servidor?.close())
 // ---------- Parseo MIME ----------
 const MULTIPART = [
   'From: =?UTF-8?Q?Jorge_Mol=C3=ADna?= <JMolina@RedesDelSur.example>',
-  'To: crm.local@iaeste.test',
+  'To: crm.local@demo.test',
   'Subject: =?ISO-8859-1?Q?Re:_Pr=E1cticas_2027?=',
   'Date: Tue, 06 Oct 2026 10:15:00 +0200',
   'Message-ID: <abc-123@redesdelsur.example>',
-  'In-Reply-To: <previo@iaeste.test>',
+  'In-Reply-To: <previo@demo.test>',
   'MIME-Version: 1.0',
   'Content-Type: multipart/mixed; boundary="EXT"',
   '',
@@ -81,7 +81,7 @@ test('parsea multipart (texto + html + adjunto), charsets y cabeceras codificada
   assert.equal(p.texto, 'Hola, nos interesaría recibir más información.')
   assert.match(p.html, /<b>interesaría<\/b>/)
   assert.equal(p.messageId, '<abc-123@redesdelsur.example>')
-  assert.equal(p.inReplyTo, '<previo@iaeste.test>')
+  assert.equal(p.inReplyTo, '<previo@demo.test>')
   assert.equal(p.fecha.toISOString(), '2026-10-06T08:15:00.000Z')
 })
 
@@ -124,7 +124,7 @@ test('ingesta: remitente desconocido → contacto nuevo sin empresa; ignora la c
 })
 
 test('ingesta: una respuesta desde otra dirección se engancha al hilo', async () => {
-  const base1 = `<hilo-orig-${Date.now()}@iaeste.test>`
+  const base1 = `<hilo-orig-${Date.now()}@demo.test>`
   await sb.from('emails').insert({ direccion: 'saliente', empresa_id: empresaPablo, message_id: base1, remitente: PROPIA, destinatario: 'x@y.example', asunto: 'a', enviado_en: new Date().toISOString() })
   const p = await parsearCorreo(crudo(`otra${Date.now()}@personal.example`, `<hilo-resp-${Date.now()}@x.example>`, `In-Reply-To: ${base1}\r\n`))
   await ingestarEntrante(sb, p, { cuentaPropia: PROPIA })
@@ -146,7 +146,7 @@ test('API: exige sesión', async () => {
 })
 
 test('API: un miembro envía desde su empresa, se guarda y llega a Mailpit con cabeceras de hilo', async () => {
-  const { token } = await login('marta@iaeste.test', 'Miembro1234')
+  const { token } = await login('marta@demo.test', 'Miembro1234')
   const asunto = `Prueba de envío ${Date.now()}`
   const r = await post('/api/emails/send', token, { empresa_id: empresaMarta, para: 'jmolina@redesdelsur.example', asunto, cuerpo: 'Hola Jorge,\n\n<b>gracias</b> & saludos' })
   assert.equal(r.status, 201, await r.clone().text())
@@ -173,11 +173,11 @@ test('API: un miembro envía desde su empresa, se guarda y llega a Mailpit con c
 })
 
 test('API: mensaje en HTML (firma pegada de Gmail): se conserva el formato y se quita lo peligroso', async () => {
-  const { token } = await login('marta@iaeste.test', 'Miembro1234')
+  const { token } = await login('marta@demo.test', 'Miembro1234')
   const asunto = `Prueba HTML ${Date.now()}`
   const firma = '<table border="0" cellspacing="3" cellpadding="0" width="652" style="width:489.05pt"><tbody><tr><td style="width:245.8pt;padding:0.75pt">'
     + '<p class="MsoNormal" style="margin-bottom:0.0001pt;line-height:normal"><b style="font-family:arial,helvetica,sans-serif;color:rgb(11,61,89);font-size:9pt">Marta Sanz</b></p>'
-    + '<p><font face="Verdana, sans-serif" color="#134f5c">IAESTE Málaga</font> · <a href="https://www.iaeste.es">www.iaeste.es</a></p>'
+    + '<p><font face="Verdana, sans-serif" color="#134f5c">Mi Centro</font> · <a href="https://www.example.com">www.example.com</a></p>'
     + '<p><img src="https://docs.google.com/uc?export=download&amp;id=abc" width="200" height="57"></p></td></tr></tbody></table>'
   const html = `<div>Hola Jorge,<br><br>Te escribo por las <b>prácticas</b>.</div>${firma}`
     + '<script>alert(1)</script><a href="javascript:alert(1)" onclick="x()">malo</a><img src="cid:logo"><img src="data:image/png;base64,AAAA"><p style="position:fixed;background:url(https://x.example/y.png);color:red">fin</p>'
@@ -185,7 +185,7 @@ test('API: mensaje en HTML (firma pegada de Gmail): se conserva el formato y se 
   assert.equal(r.status, 201, await r.clone().text())
   const { data } = await sb.from('emails').select('cuerpo_html, cuerpo_texto').eq('id', (await r.json()).id).single()
 
-  for (const queda of ['<b>prácticas</b>', 'cellspacing="3"', 'color:rgb(11,61,89)', '<font face="Verdana, sans-serif" color="#134f5c">', 'href="https://www.iaeste.es"', 'src="https://docs.google.com/uc?export=download&amp;id=abc"', 'style="color:red"']) {
+  for (const queda of ['<b>prácticas</b>', 'cellspacing="3"', 'color:rgb(11,61,89)', '<font face="Verdana, sans-serif" color="#134f5c">', 'href="https://www.example.com"', 'src="https://docs.google.com/uc?export=download&amp;id=abc"', 'style="color:red"']) {
     assert.ok(data.cuerpo_html.includes(queda), `conserva ${queda}`)
   }
   for (const fuera of ['<script', 'javascript:', 'onclick', 'cid:', 'data:image', 'position', 'url(', 'class=']) {
@@ -205,7 +205,7 @@ test('API: mensaje en HTML (firma pegada de Gmail): se conserva el formato y se 
 })
 
 test('API: el primer correo pasa la empresa a «mail enviado» (y deja rastro en el historial); en otros estados no la toca', async () => {
-  const { token } = await login('marta@iaeste.test', 'Miembro1234')
+  const { token } = await login('marta@demo.test', 'Miembro1234')
   const envio = () => post('/api/emails/send', token, { empresa_id: empresaMarta, para: 'jmolina@redesdelsur.example', asunto: `Estado ${Date.now()}`, cuerpo: 'hola' })
   const estado = async () => (await sb.from('empresas').select('estado').eq('id', empresaMarta).single()).data.estado
 
@@ -224,7 +224,7 @@ test('API: el primer correo pasa la empresa a «mail enviado» (y deja rastro en
 })
 
 test('API: un miembro no puede enviar desde empresas ajenas ni a destinatarios que no son de la empresa', async () => {
-  const { token } = await login('marta@iaeste.test', 'Miembro1234')
+  const { token } = await login('marta@demo.test', 'Miembro1234')
   let r = await post('/api/emails/send', token, { empresa_id: empresaPablo, para: 'rhernandez@x.example', asunto: 'a', cuerpo: 'b' })
   assert.equal(r.status, 403)
   r = await post('/api/emails/send', token, { empresa_id: empresaMarta, para: 'victima@cualquiera.example', asunto: 'a', cuerpo: 'b' })
@@ -233,7 +233,7 @@ test('API: un miembro no puede enviar desde empresas ajenas ni a destinatarios q
 })
 
 test('API: validación de entrada (asunto con saltos de línea, vacíos, email inválido)', async () => {
-  const { token } = await login('ana@iaeste.test', 'Admin1234')
+  const { token } = await login('ana@demo.test', 'Admin1234')
   const ok = { empresa_id: empresaMarta, para: 'jmolina@redesdelsur.example', asunto: 'a', cuerpo: 'b' }
   for (const malo of [{ asunto: 'a\r\nBcc: x@y.z' }, { asunto: '' }, { cuerpo: '  ' }, { para: 'no-es-email' }, { cuerpo: 'x'.repeat(20_001) }]) {
     assert.equal((await post('/api/emails/send', token, { ...ok, ...malo })).status, 400, JSON.stringify(malo).slice(0, 60))
@@ -242,13 +242,13 @@ test('API: validación de entrada (asunto con saltos de línea, vacíos, email i
 })
 
 test('API: un admin envía desde cualquier empresa; /api/sync exige sesión (cualquier usuario puede pedirla)', async () => {
-  const ana = await login('ana@iaeste.test', 'Admin1234')
+  const ana = await login('ana@demo.test', 'Admin1234')
   const r = await post('/api/emails/send', ana.token, { empresa_id: empresaPablo, para: 'rdelgado@meridiano.example', asunto: `Admin ${Date.now()}`, cuerpo: 'hola' })
   // rdelgado no está en la ficha de Meridiano (es talento@meridiano.example): comprobamos la regla, no el éxito
   assert.equal(r.status, 403)
   const r2 = await post('/api/emails/send', ana.token, { empresa_id: empresaPablo, para: 'talento@meridiano.example', asunto: `Admin ${Date.now()}`, cuerpo: 'hola' })
   assert.equal(r2.status, 201)
-  const marta = await login('marta@iaeste.test', 'Miembro1234')
+  const marta = await login('marta@demo.test', 'Miembro1234')
   const sync = await post('/api/sync', marta.token, {})
   assert.equal(sync.status, 200)
   assert.equal((await sync.json()).omitido, true) // en las pruebas SYNC_ENABLED=false
@@ -257,13 +257,13 @@ test('API: un admin envía desde cualquier empresa; /api/sync exige sesión (cua
 
 // ---------- Lectura (RLS) ----------
 test('RLS: el miembro solo lee los correos de sus empresas; los sin clasificar solo los ve un admin', async () => {
-  const marta = await login('marta@iaeste.test', 'Miembro1234')
+  const marta = await login('marta@demo.test', 'Miembro1234')
   const { data } = await marta.cliente.from('emails').select('empresa_id')
   assert.ok(data.length > 0)
   assert.ok(data.every((e) => e.empresa_id === empresaMarta || e.empresa_id !== null))
   assert.equal((await marta.cliente.from('emails').select('id').eq('empresa_id', empresaPablo)).data.length, 0)
   assert.equal((await marta.cliente.from('emails').select('id').is('empresa_id', null)).data.length, 0)
-  const ana = await login('ana@iaeste.test', 'Admin1234')
+  const ana = await login('ana@demo.test', 'Admin1234')
   assert.ok((await ana.cliente.from('emails').select('id').is('empresa_id', null)).data.length > 0)
   // Nadie escribe desde el navegador
   const w = await marta.cliente.from('emails').insert({ direccion: 'saliente', message_id: '<hack>', remitente: 'a', destinatario: 'b', enviado_en: new Date().toISOString(), empresa_id: empresaMarta })
@@ -274,7 +274,7 @@ test('RLS: el miembro solo lee los correos de sus empresas; los sin clasificar s
 
 // ---------- Adjuntos ----------
 test('API: adjuntos (propios y de plantilla) llegan a Mailpit, se copian a la carpeta del correo y se validan las rutas', async () => {
-  const { token, cliente } = await login('marta@iaeste.test', 'Miembro1234')
+  const { token, cliente } = await login('marta@demo.test', 'Miembro1234')
   const subir = async (carpeta, nombre, contenido) => {
     const path = `${carpeta}/${randomUUID()}-${nombre}`
     const { error } = await cliente.storage.from('adjuntos').upload(path, Buffer.from(contenido), { contentType: 'text/plain' })
@@ -286,19 +286,19 @@ test('API: adjuntos (propios y de plantilla) llegan a Mailpit, se copian a la ca
   const asunto = `Con adjuntos ${Date.now()}`
   const base = { empresa_id: empresaMarta, para: 'jmolina@redesdelsur.example', asunto, cuerpo: 'Te adjunto los archivos.' }
 
-  const r = await post('/api/emails/send', token, { ...base, adjuntos: [{ path: propio, nombre: 'Convenio IAESTE.txt' }, { path: deplantilla, nombre: 'presentacion.txt' }] })
+  const r = await post('/api/emails/send', token, { ...base, adjuntos: [{ path: propio, nombre: 'Convenio.txt' }, { path: deplantilla, nombre: 'presentacion.txt' }] })
   assert.equal(r.status, 201, await r.clone().text())
   const { id } = await r.json()
 
   const { data } = await sb.from('emails').select('adjuntos').eq('id', id).single()
   assert.equal(data.adjuntos.length, 2)
-  assert.deepEqual(data.adjuntos.map((a) => a.nombre), ['Convenio IAESTE.txt', 'presentacion.txt'])
+  assert.deepEqual(data.adjuntos.map((a) => a.nombre), ['Convenio.txt', 'presentacion.txt'])
   assert.ok(data.adjuntos.every((a) => a.path.startsWith(`correos/${empresaMarta}/`)), 'el de plantilla se copió a la carpeta del correo')
   assert.equal(data.adjuntos[0].tamano, 'texto del convenio'.length)
 
   const lista = await (await fetch(`${MAILPIT}/api/v1/search?query=${encodeURIComponent('subject:"' + asunto + '"')}`)).json()
   const msg = await (await fetch(`${MAILPIT}/api/v1/message/${lista.messages[0].ID}`)).json()
-  assert.deepEqual(msg.Attachments.map((a) => a.FileName).sort(), ['Convenio IAESTE.txt', 'presentacion.txt'])
+  assert.deepEqual(msg.Attachments.map((a) => a.FileName).sort(), ['Convenio.txt', 'presentacion.txt'])
 
   // El miembro puede descargar los archivos de su correo (política de Storage)
   const { data: blob, error } = await cliente.storage.from('adjuntos').download(data.adjuntos[0].path)

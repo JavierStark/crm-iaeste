@@ -43,7 +43,7 @@ create trigger configuracion_sello before update on public.configuracion
 -- ------------------------------------------------------------
 -- 2. Subcentros (escuelas o facultades de cada persona)
 -- ------------------------------------------------------------
--- Antes eran un check fijo (IDML, IFML…). Ahora es una tabla que el admin edita en Configuración.
+-- Antes eran un check fijo (ING, CIE…). Ahora es una tabla que el admin edita en Configuración.
 create table public.subcentros (
   codigo text primary key check (codigo ~ '^[A-Za-z0-9][A-Za-z0-9 ._-]{0,19}$'),
   orden int not null default 0

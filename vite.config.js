@@ -4,6 +4,6 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  // 5174 (y Supabase local en 553xx) para poder tenerlo encendido a la vez que el CRM de Málaga
+  // 5174 (y Supabase local en 553xx) para poder tener a la vez otro CRM en el puerto por defecto de Vite (5173)
   server: { port: 5174, strictPort: true },
 })

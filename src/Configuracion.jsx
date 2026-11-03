@@ -257,16 +257,16 @@ function Identidad({ cfg, set, setErr }) {
     <Seccion titulo="Nombre y aspecto" sub="Cómo se llama el centro y cómo se ve el CRM.">
       <div className="grid sm:grid-cols-2 gap-3">
         <Campo label="Nombre del centro" ayuda="Aparece en los textos, en la guía y como remitente de los correos.">
-          <Input value={cfg.nombre} onChange={(e) => set('nombre', e.target.value)} placeholder="IAESTE Sevilla" maxLength={80} />
+          <Input value={cfg.nombre} onChange={(e) => set('nombre', e.target.value)} placeholder="Mi centro" maxLength={80} />
         </Campo>
         <Campo label="Título de la aplicación" ayuda="Pestaña del navegador y cabecera en el móvil.">
-          <Input value={cfg.tituloApp} onChange={(e) => set('tituloApp', e.target.value)} placeholder="CRM IAESTE Sevilla" maxLength={60} />
+          <Input value={cfg.tituloApp} onChange={(e) => set('tituloApp', e.target.value)} placeholder="CRM Mi centro" maxLength={60} />
         </Campo>
         <Campo label="Ciudad o lugar" ayuda="Debajo del logo, en la barra lateral. Puede quedar vacío.">
           <Input value={cfg.lugar} onChange={(e) => set('lugar', e.target.value)} placeholder="Sevilla" maxLength={40} />
         </Campo>
         <Campo label="Texto corto del logo" ayuda="Se muestra junto a un icono si no hay imagen de logo.">
-          <Input value={cfg.nombreCorto} onChange={(e) => set('nombreCorto', e.target.value)} placeholder="IAESTE" maxLength={20} />
+          <Input value={cfg.nombreCorto} onChange={(e) => set('nombreCorto', e.target.value)} placeholder="CRM" maxLength={20} />
         </Campo>
         <Campo label="Quién usa el CRM" ayuda={`«El CRM de ${cfg.equipo || '…'} de ${cfg.nombre || '…'}»`}>
           <Input value={cfg.equipo} onChange={(e) => set('equipo', e.target.value)} placeholder="el equipo de empresas" maxLength={60} />
@@ -443,7 +443,7 @@ function Puntuacion({ cfg, set }) {
   const quitarConc = (id) => setRub({ ...rub, conceptos: rub.conceptos.filter((x) => x.id !== id) })
   const anadirConc = (cat) => setRub({ ...rub, conceptos: [...rub.conceptos, { id: nuevoId(), cat, texto: '', min: '', max: '' }] })
   const cargarEjemplo = () => {
-    if (!confirm('Se sustituirá la rúbrica actual por la de ejemplo (IAESTE Málaga). Los puntos ya anotados no cambian. ¿Continuar?')) return
+    if (!confirm('Se sustituirá la rúbrica actual por la de ejemplo. Los puntos ya anotados no cambian. ¿Continuar?')) return
     setRub(copia(RUBRICA_EJEMPLO)); set('puntos.categoriaGt', 'H')
   }
   const vaciar = () => {

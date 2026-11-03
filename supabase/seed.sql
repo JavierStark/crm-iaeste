@@ -3,11 +3,11 @@
 -- Todo es ficticio. No ejecutar nunca en producción.
 --
 -- Usuarios (email / contraseña):
---   ana@iaeste.test    / Admin1234     admin
---   luis@iaeste.test   / Admin1234     admin
---   marta@iaeste.test  / Miembro1234   miembro
---   pablo@iaeste.test  / Miembro1234   miembro
---   irene@iaeste.test  / Miembro1234   miembro
+--   ana@demo.test    / Admin1234     admin
+--   luis@demo.test   / Admin1234     admin
+--   marta@demo.test  / Miembro1234   miembro
+--   pablo@demo.test  / Miembro1234   miembro
+--   irene@demo.test  / Miembro1234   miembro
 -- ============================================================
 
 -- ---------- Usuarios ----------
@@ -34,26 +34,26 @@ returns void language sql as $$
 $$;
 
 -- El trigger handle_new_user crea los perfiles (el primero, admin)
-select pg_temp.crear_usuario('11111111-1111-4111-8111-111111111111', 'ana@iaeste.test',   'Admin1234',   'Ana García');
-select pg_temp.crear_usuario('22222222-2222-4222-8222-222222222222', 'luis@iaeste.test',  'Admin1234',   'Luis Romero');
-select pg_temp.crear_usuario('33333333-3333-4333-8333-333333333333', 'marta@iaeste.test', 'Miembro1234', 'Marta Sanz');
-select pg_temp.crear_usuario('44444444-4444-4444-8444-444444444444', 'pablo@iaeste.test', 'Miembro1234', 'Pablo Ortiz');
-select pg_temp.crear_usuario('55555555-5555-4555-8555-555555555555', 'irene@iaeste.test', 'Miembro1234', 'Irene Vidal');
+select pg_temp.crear_usuario('11111111-1111-4111-8111-111111111111', 'ana@demo.test',   'Admin1234',   'Ana García');
+select pg_temp.crear_usuario('22222222-2222-4222-8222-222222222222', 'luis@demo.test',  'Admin1234',   'Luis Romero');
+select pg_temp.crear_usuario('33333333-3333-4333-8333-333333333333', 'marta@demo.test', 'Miembro1234', 'Marta Sanz');
+select pg_temp.crear_usuario('44444444-4444-4444-8444-444444444444', 'pablo@demo.test', 'Miembro1234', 'Pablo Ortiz');
+select pg_temp.crear_usuario('55555555-5555-4555-8555-555555555555', 'irene@demo.test', 'Miembro1234', 'Irene Vidal');
 
 update public.profiles set rol = 'admin' where id = '22222222-2222-4222-8222-222222222222';
 
--- Configuración de IAESTE Málaga (en producción la pone un admin desde la pestaña Configuración)
+-- Configuración de un centro de demostración (en producción la pone un admin desde la pestaña Ajustes)
 update public.configuracion set datos = '{
-  "nombre": "IAESTE Málaga", "nombreCorto": "IAESTE", "lugar": "Málaga", "tituloApp": "CRM IAESTE",
-  "logo": "/logo-iaeste.png", "estados": { "otra_provincia": "Otra comunidad" },
+  "nombre": "Centro Demo", "nombreCorto": "Demo", "lugar": "Sevilla", "tituloApp": "CRM Centro Demo",
+  "estados": { "otra_provincia": "Otra comunidad" },
   "funciones": { "puntuacion": true }, "puntos": { "primeraCampana": 2026 }
 }'::jsonb;
 
 -- Centros (Irene se deja sin centro a propósito, para probar el aviso de Equipo)
-insert into public.subcentros (codigo, orden) values ('IDML', 0), ('IFML', 1), ('QMML', 2), ('AQML', 3), ('TLML', 4);
-update public.profiles set centro = 'IDML' where id in ('11111111-1111-4111-8111-111111111111', '33333333-3333-4333-8333-333333333333');
-update public.profiles set centro = 'QMML' where id = '22222222-2222-4222-8222-222222222222';
-update public.profiles set centro = 'IFML' where id = '44444444-4444-4444-8444-444444444444';
+insert into public.subcentros (codigo, orden) values ('ING', 0), ('CIE', 1), ('ECO', 2), ('ART', 3), ('SAL', 4);
+update public.profiles set centro = 'ING' where id in ('11111111-1111-4111-8111-111111111111', '33333333-3333-4333-8333-333333333333');
+update public.profiles set centro = 'ECO' where id = '22222222-2222-4222-8222-222222222222';
+update public.profiles set centro = 'CIE' where id = '44444444-4444-4444-8444-444444444444';
 
 -- ---------- Puntuaciones ----------
 -- Campaña 2025 (ya cerrada) y apuntes de la actual (2026, año natural). Los de "Socio Importado" no tienen cuenta:
@@ -61,15 +61,15 @@ update public.profiles set centro = 'IFML' where id = '44444444-4444-4444-8444-4
 insert into public.puntos (usuario_id, fecha, categoria, concepto, descripcion, cantidad, puntos, motivo, creado_por) values
   ('33333333-3333-4333-8333-333333333333', '2025-12-31', 'INI', 'antiguedad',        'Antigüedad (campañas completadas)', 1, 5,    '1 campaña: 5 pts.', '11111111-1111-4111-8111-111111111111'),
   ('33333333-3333-4333-8333-333333333333', '2025-12-31', 'H',   'h_reunion_online',  'Reunirse con una empresa online',   null, 10, 'Reunión con Consultora Atlas', '11111111-1111-4111-8111-111111111111'),
-  ('33333333-3333-4333-8333-333333333333', '2025-12-31', 'C',   'c_comite',          'Reunión de comité local',           6, 12,   null, '11111111-1111-4111-8111-111111111111'),
-  ('44444444-4444-4444-8444-444444444444', '2025-12-31', 'H',   'h_practica_nueva',  'Conseguir práctica de empresa nueva', null, 50, 'Práctica en Smart City Labs', '11111111-1111-4111-8111-111111111111'),
-  ('11111111-1111-4111-8111-111111111111', '2026-09-20', 'A',   'a_presidencia',     'Presidencia',                       1, 10,   'Primer tramo de la campaña', '22222222-2222-4222-8222-222222222222'),
-  ('33333333-3333-4333-8333-333333333333', '2026-10-05', 'F',   'f_stand_hora',      'Stand o evento presencial: horas',  3, 6,    'Feria de Empleo', '11111111-1111-4111-8111-111111111111'),
+  ('33333333-3333-4333-8333-333333333333', '2025-12-31', 'A',   'a_reunion',         'Asistir a una reunión del equipo',  6, 6,    null, '11111111-1111-4111-8111-111111111111'),
+  ('44444444-4444-4444-8444-444444444444', '2025-12-31', 'H',   'h_practica_nueva',  'Conseguir una práctica de una empresa nueva', null, 50, 'Práctica en Smart City Labs', '11111111-1111-4111-8111-111111111111'),
+  ('11111111-1111-4111-8111-111111111111', '2026-09-20', 'A',   'a_cargo',           'Ocupar un cargo en la junta o coordinar un grupo', 1, 10,   'Primer tramo de la campaña', '22222222-2222-4222-8222-222222222222'),
+  ('33333333-3333-4333-8333-333333333333', '2026-10-05', 'A',   'a_evento',          'Organizar o participar en un evento', null, 6,    'Feria de Empleo', '11111111-1111-4111-8111-111111111111'),
   ('33333333-3333-4333-8333-333333333333', '2026-10-08', 'H',   'h_reunion_presencial', 'Reunirse con una empresa presencialmente', null, 15, 'Reunión en Telemática Avanzada', '11111111-1111-4111-8111-111111111111'),
-  ('44444444-4444-4444-8444-444444444444', '2026-10-09', 'I',   'i_cartel',          'Cartel',                            null, 4, 'Cartel de la charla informativa', '22222222-2222-4222-8222-222222222222'),
-  ('55555555-5555-4555-8555-555555555555', '2026-10-10', 'E',   'e_horas',           'Horas de despacho',                 4, 4,    null, '11111111-1111-4111-8111-111111111111');
+  ('44444444-4444-4444-8444-444444444444', '2026-10-09', 'A',   'a_evento',          'Organizar o participar en un evento', null, 4, 'Cartel de la charla informativa', '22222222-2222-4222-8222-222222222222'),
+  ('55555555-5555-4555-8555-555555555555', '2026-10-10', 'A',   'a_reunion',         'Asistir a una reunión del equipo',  4, 4,    null, '11111111-1111-4111-8111-111111111111');
 insert into public.puntos (socio_nombre, socio_centro, fecha, categoria, concepto, descripcion, cantidad, puntos, motivo) values
-  ('Socio Importado Prueba', 'TLML', '2025-12-31', 'H', 'importado', 'GT Empresas', null, 40, 'Apunte sin cuenta: se vincula al registrarse');
+  ('Socio Importado Prueba', 'SAL', '2025-12-31', 'H', 'importado', 'Empresas', null, 40, 'Apunte sin cuenta: se vincula al registrarse');
 
 -- ---------- Empresas ----------
 -- El historial se genera aquí abajo a mano (con fechas en el pasado), así que se apaga el
@@ -198,13 +198,13 @@ select e.id, e.contacto, lower(e.email) from public.empresas e
 where e.nombre in ('Redes del Sur S.A.', 'Telemática Avanzada S.L.');
 
 insert into public.emails (direccion, contacto_id, empresa_id, message_id, in_reply_to, remitente, destinatario, asunto, cuerpo_texto, enviado_en, enviado_por)
-select v.dir, c.id, c.empresa_id, v.mid, v.reply, case when v.dir = 'saliente' then 'crm.local@iaeste.test' else c.email end,
-       case when v.dir = 'saliente' then c.email else 'crm.local@iaeste.test' end,
+select v.dir, c.id, c.empresa_id, v.mid, v.reply, case when v.dir = 'saliente' then 'crm.local@demo.test' else c.email end,
+       case when v.dir = 'saliente' then c.email else 'crm.local@demo.test' end,
        v.asunto, v.cuerpo, now() - make_interval(days => v.hace), case when v.dir = 'saliente' then '33333333-3333-4333-8333-333333333333'::uuid end
 from (values
-  ('redesdelsur.example', 'saliente', '<seed-1@iaeste.test>', null,                   'IAESTE Málaga - Programa de prácticas internacionales', E'Buenos días Jorge,\n\nTe escribo de parte de IAESTE Málaga para presentaros nuestro programa de prácticas internacionales.\n\nUn saludo.', 12),
-  ('redesdelsur.example', 'entrante', '<seed-2@redesdelsur.example>', '<seed-1@iaeste.test>', 'Re: IAESTE Málaga - Programa de prácticas internacionales', E'Hola,\n\nNos interesa. ¿Podéis mandarnos el modelo de convenio y las condiciones?\n\nGracias,\nJorge', 10),
-  ('redesdelsur.example', 'saliente', '<seed-3@iaeste.test>', '<seed-2@redesdelsur.example>', 'Re: IAESTE Málaga - Programa de prácticas internacionales', E'Hola Jorge,\n\nTe adjunto el modelo de convenio. Dime si necesitáis algo más.\n\nUn saludo.', 9),
+  ('redesdelsur.example', 'saliente', '<seed-1@demo.test>', null,                   'Propuesta de colaboración', E'Buenos días Jorge,\n\nTe escribo de parte de Centro Demo para presentaros nuestra propuesta de colaboración.\n\nUn saludo.', 12),
+  ('redesdelsur.example', 'entrante', '<seed-2@redesdelsur.example>', '<seed-1@demo.test>', 'Re: Propuesta de colaboración', E'Hola,\n\nNos interesa. ¿Podéis mandarnos el modelo de convenio y las condiciones?\n\nGracias,\nJorge', 10),
+  ('redesdelsur.example', 'saliente', '<seed-3@demo.test>', '<seed-2@redesdelsur.example>', 'Re: Propuesta de colaboración', E'Hola Jorge,\n\nTe adjunto el modelo de convenio. Dime si necesitáis algo más.\n\nUn saludo.', 9),
   ('telematica-avanzada.example', 'entrante', '<seed-4@telematica-avanzada.example>', null, 'Consulta sobre plazas de verano', E'Buenos días,\n\nQuerríamos 2 plazas para verano de 2027. ¿Cuál es el plazo?\n\nCarmen Ruiz', 3)
 ) v(dom, dir, mid, reply, asunto, cuerpo, hace)
 join public.contactos c on c.email like '%@' || v.dom;
@@ -212,5 +212,5 @@ join public.contactos c on c.email like '%@' || v.dom;
 -- Un correo de un remitente que no está en ninguna ficha: solo lo ven los admins
 insert into public.contactos (email, nombre) values ('desconocido@otraempresa.example', 'Alguien Nuevo');
 insert into public.emails (direccion, contacto_id, message_id, remitente, destinatario, asunto, cuerpo_texto, enviado_en)
-select 'entrante', id, '<seed-5@otraempresa.example>', email, 'crm.local@iaeste.test', 'Información sobre IAESTE', 'Hola, ¿cómo podemos ofrecer una plaza?', now() - interval '1 day'
+select 'entrante', id, '<seed-5@otraempresa.example>', email, 'crm.local@demo.test', 'Información sobre vuestra propuesta', 'Hola, ¿cómo podemos ofrecer una plaza?', now() - interval '1 day'
 from public.contactos where email = 'desconocido@otraempresa.example';
