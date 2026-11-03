@@ -237,5 +237,23 @@ ok(!pv.error && vinc.data?.length === 1 && vinc.data[0].usuario_id === pv.data.i
 ok(pv.data?.centro === 'ART', 'al vincular se respeta el centro elegido al registrarse')
 ok(!!(await nuevo().auth.signUp({ email: `debil${Date.now()}@demo.test`, password: 'sololetras' })).error, 'contraseña sin números rechazada')
 
+console.log('Admin inicial')
+const leerEnv = (f) => { try { return Object.fromEntries(readFileSync(f, 'utf8').split(/\r?\n/).filter((l) => l.includes('=') && !l.startsWith('#')).map((l) => [l.slice(0, l.indexOf('=')), l.slice(l.indexOf('=') + 1)])) } catch { return {} } }
+const servicio = leerEnv('server/.env').SUPABASE_SERVICE_ROLE_KEY
+ok((await ana.from('instalacion').select('admin_email')).error !== null, 'ni un admin puede leer la tabla instalacion')
+ok((await anon.from('instalacion').select('admin_email')).error !== null, 'sin sesión tampoco')
+if (!servicio) ok(false, 'falta server/.env con SUPABASE_SERVICE_ROLE_KEY (npm run db:env)')
+else {
+  const sr = createClient(env.VITE_SUPABASE_URL, servicio, { auth: { persistSession: false } })
+  const jefa = `jefa${sufijo}@demo.test`
+  ok(!(await sr.from('instalacion').update({ admin_email: jefa.toUpperCase() }).eq('id', true)).error, 'el service_role guarda el email del admin inicial')
+  await nuevo().auth.signUp({ email: `antes${sufijo}@demo.test`, password: 'Prueba1234', options: { data: { nombre: 'Llega Antes' } } })
+  await nuevo().auth.signUp({ email: jefa, password: 'Prueba1234', options: { data: { nombre: 'Jefa Inicial' } } })
+  const rol = async (n) => (await ana.from('profiles').select('rol').eq('nombre', n).single()).data?.rol
+  ok(await rol('Llega Antes') === 'miembro', 'con admin inicial, otro email entra como miembro')
+  ok(await rol('Jefa Inicial') === 'admin', 'el email del admin inicial entra como admin (sin distinguir mayúsculas)')
+  await sr.from('instalacion').update({ admin_email: null }).eq('id', true)
+}
+
 console.log(fallos ? `\n${fallos} FALLO(S)` : '\nTodo correcto')
 process.exit(fallos ? 1 : 0)

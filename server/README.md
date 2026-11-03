@@ -36,7 +36,7 @@ Las tablas están en `supabase/migrations/20261008000000_correo.sql` (`npx supab
 
 ## 3. Variables de entorno
 
-Ver `.env.example`. Las imprescindibles: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `CORS_ORIGINS` (la URL del CRM en Vercel).
+Ver `.env.example`. Las imprescindibles: `SUPABASE_URL` (en Vercel vale `VITE_SUPABASE_URL`, no hace falta repetirla), `SUPABASE_SERVICE_ROLE_KEY` y `CORS_ORIGINS` si la API está en otro dominio que el CRM. Para el buzón, `GMAIL_USER` y `GMAIL_APP_PASSWORD`: sin ellas la API arranca igual, pero responde 503 al enviar y no lee el buzón (`/api/health` devuelve `correo: false`).
 
 Para SMTP por STARTTLS en lugar de SSL: `SMTP_PORT=587` y `SMTP_SECURE=false`.
 
@@ -58,7 +58,7 @@ Los correos enviados en local aparecen en Mailpit (<http://127.0.0.1:55324>).
 npm --prefix server run sync    # revisa los últimos días de la bandeja y guarda los correos nuevos
 ```
 
-**Producción (Vercel)**: no hay que desplegar `server/` aparte. Define en Vercel `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `GMAIL_USER`, `GMAIL_APP_PASSWORD` (y `MAIL_FROM_NAME`) y deja sin definir `VITE_EMAIL_API_URL`. Comprueba `GET /api/health`. Si prefieres un hosting Node propio, `npm start` en `server/` sigue funcionando (entonces sí hacen falta `CORS_ORIGINS` y `VITE_EMAIL_API_URL`).
+**Producción (Vercel)**: no hay que desplegar `server/` aparte. Define en Vercel `SUPABASE_SERVICE_ROLE_KEY` (la URL se toma de `VITE_SUPABASE_URL`), `GMAIL_USER`, `GMAIL_APP_PASSWORD` (y `MAIL_FROM_NAME`) y deja sin definir `VITE_EMAIL_API_URL`. Comprueba `GET /api/health`. Si prefieres un hosting Node propio, `npm start` en `server/` sigue funcionando (entonces sí hacen falta `CORS_ORIGINS` y `VITE_EMAIL_API_URL`).
 
 ## 5. Cómo funciona
 

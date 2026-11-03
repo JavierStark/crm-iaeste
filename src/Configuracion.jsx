@@ -8,6 +8,7 @@ import { DATOS, DEFECTO, FUNCIONES, SUBCENTROS, mezclar, resolver, aplicarCentro
 import { RUBRICA_EJEMPLO } from './rubricaEjemplo'
 import { ESTADOS_TODOS } from './estados'
 import { Input, Label, Btn, Aviso } from './ui'
+import { estadoCorreo } from './EmailThread'
 
 // Pestaña Configuración (solo admins): edita la fila de `configuracion` y la tabla `subcentros`.
 // Todo se guarda de una vez con «Guardar cambios» y la página se recarga para aplicar la configuración nueva.
@@ -314,10 +315,33 @@ function Identidad({ cfg, set, setErr }) {
   )
 }
 
+// ---------- Estado del buzón (servidor) ----------
+// Las credenciales viven en las variables de entorno: aquí solo se pregunta al servidor si las tiene.
+function useEstadoCorreo() {
+  const [estado, setEstado] = useState(undefined) // undefined = comprobando
+  useEffect(() => { estadoCorreo().then(setEstado) }, [])
+  return estado
+}
+
+function AvisoCorreo({ estado, encendido, completo = false }) {
+  if (estado === undefined) return null
+  if (estado === true) return completo ? <Aviso tono="ok">Buzón configurado en el servidor ✓</Aviso> : null
+  if (!encendido && !completo) return null
+  return (
+    <Aviso tono="warn" icono={AlertCircle}>
+      {estado === false
+        ? <>El servidor no tiene buzón: faltan <code>GMAIL_USER</code> y <code>GMAIL_APP_PASSWORD</code> en las variables de entorno de Vercel. {encendido ? 'Mientras tanto no se pueden enviar correos: añádelas o apaga «Correo con las empresas».' : ''}</>
+        : <>No se puede conectar con el servicio de correo{import.meta.env.DEV ? ' (en local, arráncalo con `npm run correo`)' : ''}.</>}
+    </Aviso>
+  )
+}
+
 // ---------- Funciones ----------
 function Funciones({ cfg, set }) {
+  const correo = useEstadoCorreo()
   return (
     <Seccion titulo="Funciones" sub="Apaga lo que tu centro no use. Apagar algo solo lo oculta: los datos se conservan y puedes volver a encenderlo.">
+      <AvisoCorreo estado={correo} encendido={cfg.funciones.correo} />
       <div className="divide-y divide-slate-100 rounded-xl border border-slate-200">
         {FUNCIONES.map(([id, nombre, texto]) => (
           <div key={id} className="flex items-start gap-4 px-4 py-3">
@@ -394,8 +418,10 @@ function Empresas({ cfg, set, subs, setSubs }) {
 
 // ---------- Correo ----------
 function Correo({ cfg, set }) {
+  const estado = useEstadoCorreo()
   return (
     <Seccion titulo="Correo" sub={cfg.funciones.correo ? 'Cómo salen los correos a las empresas.' : 'El correo está apagado en Funciones: esto solo se usará si lo enciendes.'}>
+      <AvisoCorreo estado={estado} encendido={cfg.funciones.correo} completo />
       <Campo label="Nombre del remitente" ayuda={`Lo que ven las empresas como remitente. Vacío = «${cfg.nombre}». El buzón (dirección y contraseña) se configura en Vercel.`}>
         <Input value={cfg.correo.remitente} onChange={(e) => set('correo.remitente', e.target.value)} placeholder={cfg.nombre} maxLength={80} />
       </Campo>

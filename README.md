@@ -4,9 +4,9 @@ Aplicación web para gestionar el contacto con empresas de un comité: quién ha
 
 Es un **template**: pulsa **Use this template** en GitHub para tener tu propia copia y despliégala con tu propio Vercel y tu propio Supabase (ver [«Montar el CRM para un centro nuevo»](#montar-el-crm-para-un-centro-nuevo)). Los datos de cada centro quedan en su Supabase; no hay ningún servidor compartido. **Todo lo que cambia de un centro a otro se configura desde el propio CRM** (pestaña **Ajustes**, solo admins), sin tocar código:
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FTU-USUARIO%2FTU-REPO&env=VITE_SUPABASE_URL,VITE_SUPABASE_ANON_KEY,SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY,GMAIL_USER,GMAIL_APP_PASSWORD&envDescription=Claves%20de%20tu%20proyecto%20de%20Supabase%20y%20del%20Gmail%20compartido&envLink=https%3A%2F%2Fgithub.com%2FTU-USUARIO%2FTU-REPO%23desplegar-desde-cero-supabase--vercel)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FTU-USUARIO%2FTU-REPO&env=VITE_SUPABASE_URL,VITE_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY&envDescription=Las%20tres%20est%C3%A1n%20en%20el%20archivo%20.env.vercel%20que%20genera%20npm%20run%20setup&envLink=https%3A%2F%2Fgithub.com%2FTU-USUARIO%2FTU-REPO%23desplegar-desde-cero-supabase--vercel)
 
-> Sustituye `TU-USUARIO/TU-REPO` del botón por la URL de tu repositorio. Crea antes el Supabase (`npm run setup`): el botón te pedirá sus claves.
+> Sustituye `TU-USUARIO/TU-REPO` del botón por la URL de tu repositorio. Crea antes el Supabase con `npm run setup`: el botón te pedirá las tres variables que deja en `.env.vercel`. Las del Gmail (correo) son opcionales y se añaden después.
 
 | En Ajustes | Qué se cambia |
 |---|---|
@@ -28,7 +28,7 @@ Al pulsar **Guardar cambios** se aplica a todo el equipo (la página se recarga)
 | **Admin** | Ver y editar todo, crear/borrar empresas, asignarlas, registrar prácticas (empresas prioritarias), cambiar roles y centros, poner contraseñas temporales, dar, editar y penalizar puntos de la rúbrica, ajustar los automáticos y resolver solicitudes de puntos |
 | **Miembro** | Ver todas las empresas (las ajenas en solo lectura). Crear empresas (quedan asignadas a él) y, en las suyas, editar contacto, CIF, estado, notas y próximo contacto. Registrar llamadas, ver su desglose de puntos y el total de los demás, y solicitar puntos |
 
-Las reglas están impuestas en la base de datos (políticas RLS y triggers), no solo en la interfaz. El primer usuario que se registra en una base vacía es admin. Siempre tiene que quedar al menos un admin.
+Las reglas están impuestas en la base de datos (políticas RLS y triggers), no solo en la interfaz. El admin inicial es el email que diste en `npm run setup` (si no se dio ninguno, el primer usuario que se registra). Siempre tiene que quedar al menos un admin.
 
 ---
 
@@ -108,28 +108,28 @@ Unos 20 minutos. Cada centro tiene su propio Supabase (sus datos) y su propio pr
 
 0. **Tu copia**: en GitHub, **Use this template → Create a new repository** (puede ser privado). Clónala y ejecuta `npm install`.
 1. **Supabase y Vercel**: sigue «Desplegar desde cero» (abajo) con un proyecto nuevo de cada; `npm run setup` hace la parte de la base de datos.
-2. **Primer admin**: regístrate tú primero en la web nueva; el primer usuario de una base vacía es admin.
+2. **Primer admin**: regístrate en la web nueva con el email que diste en `npm run setup`; solo ese email entra como admin, aunque otra persona se registre antes.
 3. **Ajustes**: entra en la pestaña **Ajustes** y rellena nombre, logo y color; apaga lo que el centro no quiera (por defecto la **puntuación está apagada**); añade sus subcentros si los tiene.
    - Si el centro quiere puntuación, enciéndela en Funciones y edita la rúbrica en Ajustes → Puntuación: parte de la de ejemplo, **Empezar de cero**, o **Copia de seguridad → Cargar desde archivo** con la de otro centro.
 4. **Plantillas**: la base trae una plantilla de primer contacto genérica con `{{empresa}}`, `{{contacto}}` y `{{yo}}`; edítala o bórrala en la pestaña Plantillas.
-5. **Buzón**: si usan correo, crea su Gmail compartido y pon `GMAIL_USER` / `GMAIL_APP_PASSWORD` en Vercel (ver [`server/README.md`](server/README.md)). Si no, apaga «Correo con las empresas» en Ajustes.
+5. **Buzón**: si usan correo, crea su Gmail compartido y pon `GMAIL_USER` / `GMAIL_APP_PASSWORD` en Vercel (ver [`server/README.md`](server/README.md)); ese mismo Gmail sirve de SMTP para Supabase Auth (paso 4 de abajo). Si no, apaga «Correo con las empresas» en Ajustes. Ajustes → Funciones y Ajustes → Correo avisan si el correo está encendido pero el servidor no tiene buzón.
 6. Pásales el enlace de registro (`https://<su-web>/?registro`) y reparte empresas desde Equipo.
 
 Ningún paso requiere tocar código. Lo único que sigue en código son los **estados** del pipeline (sus ids están en la base de datos; los nombres sí se cambian en Ajustes).
 
 ## Desplegar desde cero (Supabase + Vercel)
 
-1. **Supabase:** crea un proyecto vacío en [supabase.com](https://supabase.com). En una terminal del repo ejecuta `npm run setup` (pide la referencia del proyecto, inicia sesión, enlaza y aplica las migraciones; **no** carga el seed). A mano sería `npx supabase login`, `npx supabase link --project-ref <ref>` y `npx supabase db push`.
-2. **Authentication → Hooks → Before User Created:** actívalo con la función Postgres `public.hook_antes_de_crear_usuario` (bloquea correos desechables).
-3. **Authentication → Sign In / Providers → Email:** deja **Confirm email** activado, longitud mínima 8 y "letters and digits". **URL Configuration:** pon la URL de Vercel como *Site URL* y en *Redirect URLs* (necesario para recuperación de contraseña y confirmación).
-4. **Authentication → SMTP:** el correo por defecto de Supabase está muy limitado (pocos mensajes por hora); configura un SMTP propio para que el equipo pueda registrarse y recuperar contraseñas.
-5. **Vercel:** importa el repo (detecta Vite). La API de correo corre en el mismo proyecto como función serverless (`api/index.js`), así que no hace falta ningún otro hosting. Variables de entorno:
-   - `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` (Project Settings → API → *anon/publishable key*).
-   - `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY` (**secreta**, sin prefijo `VITE_`).
-   - `GMAIL_USER`, `GMAIL_APP_PASSWORD` y, opcional, `MAIL_FROM_NAME` (ver [`server/README.md`](server/README.md) para crear la contraseña de aplicación).
-   No definas `VITE_EMAIL_API_URL`: sin ella el navegador usa `/api/...` del mismo dominio.
-   Los correos entrantes **no se leen en segundo plano**: se buscan en Gmail cuando alguien abre los correos de una empresa o pulsa el botón de actualizar.
-6. Regístrate tú primero: serás admin. Configura el centro en **Ajustes** y después los demás se registran; desde la pestaña **Equipo** les asignas empresas o los haces admin.
+1. **Supabase:** crea un proyecto vacío en [supabase.com](https://supabase.com) y guarda la contraseña de la base de datos. En una terminal del repo ejecuta `npm run setup`: pide la referencia del proyecto y tu email (el del admin), inicia sesión, enlaza, aplica las migraciones (**no** carga el seed), guarda tu email como admin inicial y escribe **`.env.vercel`** con las variables para Vercel. Ese archivo lleva la `service_role` key: no se sube al repo (`.gitignore`) y conviene borrarlo después de usarlo.
+2. **Vercel:** importa el repo (detecta Vite) o usa el botón de arriba, y pega el contenido de `.env.vercel` en *Settings → Environment Variables* (acepta pegar el archivo entero). Son tres: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` y `SUPABASE_SERVICE_ROLE_KEY` (**secreta**). Para el correo, añade `GMAIL_USER`, `GMAIL_APP_PASSWORD` y, opcional, `MAIL_FROM_NAME` (ver [`server/README.md`](server/README.md)); sin ellas el CRM funciona, pero no envía correos.
+   La API de correo corre en el mismo proyecto como función serverless (`api/index.js`), así que no hace falta otro hosting. No definas `VITE_EMAIL_API_URL`: sin ella el navegador usa `/api/...` del mismo dominio. Los correos entrantes **no se leen en segundo plano**: se buscan en Gmail cuando alguien abre los correos de una empresa o pulsa el botón de actualizar.
+3. **Supabase → Authentication:**
+   - **URL Configuration:** la URL de Vercel como *Site URL* y en *Redirect URLs* (para confirmar cuentas y recuperar contraseñas).
+   - **Hooks → Before User Created:** actívalo con la función Postgres `public.hook_antes_de_crear_usuario` (bloquea correos desechables).
+   - **Sign In / Providers → Email:** deja **Confirm email** activado, longitud mínima 8 y "letters and digits".
+4. **Supabase → Authentication → SMTP:** el correo por defecto de Supabase solo envía unos pocos mensajes por hora, así que el equipo no podría registrarse el primer día. Si tenéis el Gmail del centro, usa el mismo: host `smtp.gmail.com`, puerto `465`, usuario y remitente = el Gmail, contraseña = su contraseña de aplicación.
+5. Regístrate con el email que diste en `npm run setup`: serás admin. Configura el centro en **Ajustes** y después los demás se registran; desde la pestaña **Equipo** les asignas empresas o los haces admin.
+
+Si se te olvidó dar el email o quieres cambiarlo: en el *SQL Editor* de Supabase, `update public.instalacion set admin_email = 'tu@correo.com';` (con `null`, vuelve la regla de «el primero que se registra es admin»).
 
 Para traer las novedades del template a tu copia, mira [`UPDATING.md`](UPDATING.md).
 
@@ -152,7 +152,7 @@ supabase/migrations/         esquema de la base de datos (fuente de verdad)
 server/                      servicio de correo SMTP/IMAP (Node)
 supabase/seed.sql            datos de prueba SOLO para local
 supabase/config.toml         configuración del Supabase local
-scripts/setup.mjs            prepara el Supabase de un centro nuevo (`npm run setup`)
+scripts/setup.mjs            prepara el Supabase de un centro nuevo y genera .env.vercel (`npm run setup`)
 scripts/env-local.mjs        genera .env.development.local
 scripts/smoke-test.mjs       prueba de humo de la base de datos
 ```

@@ -19,7 +19,7 @@ export const DEFECTO = {
 
   correo: {
     remitente: '',                  // nombre que ven las empresas (vacío = nombre)
-    asunto: '{{centro}} - Prácticas internacionales para {{empresa}}', // asunto del primer correo
+    asunto: '{{centro}} - Propuesta de colaboración con {{empresa}}', // asunto del primer correo
   },
 
   estados: {},                      // nombres propios de estados: { otra_provincia: 'Otra comunidad' }
@@ -80,7 +80,8 @@ export function mezclar(base, extra) {
 
 export function resolver(datos) {
   const c = mezclar(DEFECTO, datos)
-  c.correo.remitente ||= c.nombre
+  // Copia: mezclar comparte los objetos de DEFECTO que `datos` no trae, y no hay que tocarlos
+  c.correo = { ...c.correo, remitente: c.correo.remitente || c.nombre }
   c.descripcion ||= `El CRM de ${c.equipo} de ${c.nombre}: reparte empresas, haz seguimiento y escribe a las empresas con plantillas de correo.`
   return c
 }

@@ -9,6 +9,16 @@ import { formatoTamano, validarArchivos, subirArchivo, borrarArchivos, descargar
 
 // URL del servicio de correo (server/). En desarrollo, el puerto por defecto; en producción hay que definirla.
 const API = (import.meta.env.VITE_EMAIL_API_URL || (import.meta.env.DEV ? 'http://localhost:8788' : '')).replace(/\/$/, '')
+// ¿Hay buzón configurado en el servidor? true / false, o null si el servicio no responde (lo usa Ajustes)
+export async function estadoCorreo() {
+  try {
+    const r = await fetch(`${API}/api/health`)
+    return r.ok ? !!(await r.json()).correo : null
+  } catch {
+    return null
+  }
+}
+
 const REFRESCO_MS = 60_000
 const SYNC_MIN_MS = 60_000
 let ultimaSync = 0 // compartido entre fichas: no se pide a Gmail más de una vez por minuto desde este navegador

@@ -17,7 +17,11 @@ export function crearApp(sb) {
   app.use(cors({ origin: config.corsOrigins, methods: ['GET', 'POST'], allowedHeaders: ['Content-Type', 'Authorization'] }))
   app.use(express.json({ limit: '300kb' })) // un correo con firma en HTML puede pasar de 100 KB
 
-  app.get(['/health', '/api/health'], (_req, res) => res.json({ ok: true }))
+  // `correo` dice si hay buzón configurado (lo usa Ajustes para avisar); nunca devuelve las credenciales
+  app.get(['/health', '/api/health'], (_req, res) => res.json({ ok: true, correo: config.correoConfigurado }))
+
+  const exigirCorreo = (_req, _res, next) => next(config.correoConfigurado ? undefined
+    : new ErrorUsuario('El correo no está configurado: faltan GMAIL_USER y GMAIL_APP_PASSWORD en las variables de entorno (Vercel).', 503))
 
   // Autenticación: el navegador manda el token de sesión de Supabase del usuario del CRM.
   // Devuelve el perfil, o lanza ErrorUsuario(401/403).
@@ -49,7 +53,7 @@ export function crearApp(sb) {
     }
   }
 
-  app.post('/api/emails/send', autenticar, limite, async (req, res, next) => {
+  app.post('/api/emails/send', exigirCorreo, autenticar, limite, async (req, res, next) => {
     try {
       const { empresa_id, para, asunto, cuerpo, html, responder_a, adjuntos } = req.body || {}
       if (!empresa_id) throw new ErrorUsuario('Falta la empresa.')
@@ -66,7 +70,7 @@ export function crearApp(sb) {
       const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '')
       const porSecreto = config.syncSecret && token && igual(token, config.syncSecret)
       if (!porSecreto) await usuarioDe(req) // cualquier usuario con sesión puede pedir una vuelta
-      if (!config.syncEnabled) return res.json({ omitido: true })
+      if (!config.syncEnabled || !config.correoConfigurado) return res.json({ omitido: true })
       // Enfriamiento: en la práctica cada vez que alguien abre un hilo de correo se pide una vuelta
       if (Date.now() - ultimaVuelta < ENFRIAMIENTO_MS) return res.json({ omitido: true })
       ultimaVuelta = Date.now()

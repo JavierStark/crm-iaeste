@@ -2,6 +2,14 @@
 
 Cada versión indica si trae **migraciones nuevas** (hay que ejecutar `npx supabase db push`; ver [`UPDATING.md`](UPDATING.md)).
 
+## Sin publicar
+
+- **Migración nueva:** `20261104000000_admin_inicial.sql` (tabla privada `instalacion`). Si está puesto el email del admin inicial, solo ese email entra como admin.
+- `npm run setup` pide el email del admin, lo guarda y genera `.env.vercel` con las variables para Vercel.
+- El correo es opcional: sin `GMAIL_USER` ni `GMAIL_APP_PASSWORD` la API arranca (responde 503 al enviar) y Ajustes avisa. `SUPABASE_URL` ya no hace falta en Vercel.
+- El botón de Vercel pide solo tres variables.
+- Corregido: el remitente por defecto salía como «Mi centro» en vez del nombre del centro. Asunto por defecto del primer correo neutro.
+
 ## 1.0.0
 
 Primera versión del template.

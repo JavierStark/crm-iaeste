@@ -10,11 +10,13 @@ export const config = {
   // Orígenes del frontend autorizados (separados por comas)
   corsOrigins: (process.env.CORS_ORIGINS || 'http://localhost:5174').split(',').map((s) => s.trim()),
 
-  supabaseUrl: req('SUPABASE_URL'),
+  // En Vercel vale la misma URL que usa el frontend: no hace falta repetirla
+  supabaseUrl: process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || falta('SUPABASE_URL'),
   supabaseServiceKey: req('SUPABASE_SERVICE_ROLE_KEY'),
 
-  gmailUser: req('GMAIL_USER').toLowerCase(),
-  gmailPass: req('GMAIL_APP_PASSWORD').replace(/\s+/g, ''), // Google la muestra con espacios
+  // Opcionales: sin ellas la API arranca igual, pero no envía ni lee correos (ver correoConfigurado)
+  gmailUser: (process.env.GMAIL_USER || '').trim().toLowerCase(),
+  gmailPass: (process.env.GMAIL_APP_PASSWORD || '').replace(/\s+/g, ''), // Google la muestra con espacios
   // Remitente: si no se fija aquí, el de Configuración → Correo del CRM (tabla `configuracion`)
   fromName: process.env.MAIL_FROM_NAME || '',
 
@@ -37,6 +39,9 @@ export const config = {
 
   sendsPerHour: num('SENDS_PER_HOUR_PER_USER', 30),
 }
+
+// Hay buzón si está la cuenta y su contraseña (o un SMTP sin autenticación, como Mailpit en local)
+config.correoConfigurado = Boolean(config.gmailUser && (config.gmailPass || !config.smtpAuth))
 
 export const supabaseAdmin = () =>
   createClient(config.supabaseUrl, config.supabaseServiceKey, { auth: { persistSession: false, autoRefreshToken: false } })
