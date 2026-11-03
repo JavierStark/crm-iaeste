@@ -4,9 +4,9 @@ Aplicación web para gestionar el contacto con empresas de un comité: quién ha
 
 Es un **template**: pulsa **Use this template** en GitHub para tener tu propia copia y despliégala con tu propio Vercel y tu propio Supabase (ver [«Montar el CRM para un centro nuevo»](#montar-el-crm-para-un-centro-nuevo)). Los datos de cada centro quedan en su Supabase; no hay ningún servidor compartido. **Todo lo que cambia de un centro a otro se configura desde el propio CRM** (pestaña **Ajustes**, solo admins), sin tocar código:
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FTU-USUARIO%2FTU-REPO&env=VITE_SUPABASE_URL,VITE_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY&envDescription=Las%20tres%20est%C3%A1n%20en%20el%20archivo%20.env.vercel%20que%20genera%20npm%20run%20setup&envLink=https%3A%2F%2Fgithub.com%2FTU-USUARIO%2FTU-REPO%23desplegar-desde-cero-supabase--vercel)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FJavierStark%2Fcrm-iaeste&env=VITE_SUPABASE_URL,VITE_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY&envDescription=Las%20tres%20est%C3%A1n%20en%20el%20archivo%20.env.vercel%20que%20genera%20npm%20run%20setup&envLink=https%3A%2F%2Fgithub.com%2FJavierStark%2Fcrm-iaeste%23desplegar-desde-cero-supabase--vercel)
 
-> Sustituye `TU-USUARIO/TU-REPO` del botón por la URL de tu repositorio. Crea antes el Supabase con `npm run setup`: el botón te pedirá las tres variables que deja en `.env.vercel`. Las del Gmail (correo) son opcionales y se añaden después.
+> Crea antes el Supabase con `npm run setup`: el botón te pedirá las tres variables que deja en `.env.vercel`. Las del Gmail (correo) son opcionales y se añaden después.
 
 | En Ajustes | Qué se cambia |
 |---|---|

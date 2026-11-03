@@ -4,7 +4,7 @@ Tu copia es independiente: no se actualiza sola. Cuando el template publique una
 
 ```bash
 # Una sola vez: apunta a este repositorio como "upstream"
-git remote add upstream https://github.com/<propietario>/<repo-template>.git
+git remote add upstream https://github.com/JavierStark/crm-iaeste.git
 
 # Cada vez que quieras actualizar
 git fetch upstream
