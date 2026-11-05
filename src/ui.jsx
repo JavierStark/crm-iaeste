@@ -1,4 +1,6 @@
 // Componentes básicos compartidos por App.jsx y Configuracion.jsx
+import { useEffect } from 'react'
+import { X } from 'lucide-react'
 
 export const Input = (props) => (
   <input
@@ -42,3 +44,39 @@ export const Aviso = ({ tono = 'info', icono: Icono, children, className = '' })
   </div>
 )
 
+// Contenedor de diálogos: centrado en móvil como hoja inferior, y en escritorio como panel lateral (panel) o diálogo (dialogo)
+// columna: el cuerpo se reparte en una columna flex (cabecera, contenido con scroll propio, pie); fijo: ocupa casi toda la altura
+export function Modal({ children, onClose, ancho = 'max-w-lg', panel = false, columna = false, fijo = false }) {
+  useEffect(() => {
+    if (!onClose) return
+    const alTeclear = (e) => e.key === 'Escape' && onClose()
+    window.addEventListener('keydown', alTeclear)
+    return () => window.removeEventListener('keydown', alTeclear)
+  }, [onClose])
+  return (
+    <div className={`fixed inset-0 bg-brand-950/50 backdrop-blur-[2px] animate-fade-in flex z-50 ${panel ? 'items-end sm:items-stretch sm:justify-end' : 'items-end sm:items-center justify-center p-0 sm:p-4'}`} onClick={onClose}>
+      <div
+        className={`w-full ${ancho} bg-white shadow-pop ${columna
+          ? `flex flex-col overflow-hidden rounded-t-3xl sm:rounded-3xl animate-rise ${fijo ? 'h-[94vh]' : 'max-h-[94vh]'}`
+          : `overflow-y-auto scroll-thin ${
+            panel ? 'rounded-t-3xl sm:rounded-none sm:rounded-l-3xl max-h-[92vh] sm:max-h-none animate-rise sm:animate-slide-in' : 'rounded-t-3xl sm:rounded-3xl max-h-[92vh] animate-rise'
+          }`}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {children}
+      </div>
+    </div>
+  )
+}
+
+export function ModalHead({ children, onClose, sub }) {
+  return (
+    <div className="flex items-start justify-between gap-3 px-6 py-4 border-b border-slate-100 shrink-0 sticky top-0 bg-white/90 backdrop-blur z-10">
+      <div className="min-w-0">
+        <h2 className="font-bold text-slate-900 text-lg leading-snug break-words">{children}</h2>
+        {sub}
+      </div>
+      {onClose && <button onClick={onClose} aria-label="Cerrar" className="p-1.5 -mr-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition"><X className="w-5 h-5" /></button>}
+    </div>
+  )
+}

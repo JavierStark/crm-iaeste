@@ -2,10 +2,11 @@ import { useState, useEffect, useCallback, useRef, useMemo, Fragment } from 'rea
 import { supabase } from './supabase'
 import { CENTRO, F, SUBCENTROS, HAY_SUBCENTROS, textoCentro } from './centro'
 import Configuracion from './Configuracion'
-import { Input, Label, Btn, Aviso } from './ui'
+import { Input, Label, Btn, Aviso, Modal, ModalHead } from './ui'
 import { ESTADOS_TODOS } from './estados'
 import EmailThread from './EmailThread'
 import Guia from './Guia'
+import ImportarEmpresas from './ImportarEmpresas'
 import EditorCorreo from './EditorCorreo'
 import { VARIABLES, aplicarVariables } from './plantillas'
 import { limpiarHtml, htmlATexto, htmlVacio } from './html'
@@ -17,7 +18,7 @@ import {
 import {
   Building2, Plus, Search, LogOut, Pencil, Trash2, X, ChevronRight,
   Shield, User, Save, Mail, Phone, AlertCircle, KeyRound, Download, CalendarClock, Send, FileSpreadsheet, Trophy, Globe,
-  History, UserPlus, UserMinus, Inbox, MapPin, Star, AlertTriangle, Users, FileText, BookOpen, Paperclip, Settings,
+  History, UserPlus, UserMinus, Inbox, MapPin, Star, AlertTriangle, Users, FileText, BookOpen, Paperclip, Settings, Upload,
 } from 'lucide-react'
 
 // ---------- Config ----------
@@ -179,43 +180,6 @@ const Avatar = ({ nombre = '?', size = 'md', className = '' }) => {
   const color = AVATAR_COLORES[[...n].reduce((a, ch) => a + ch.charCodeAt(0), 0) % AVATAR_COLORES.length]
   const tam = size === 'sm' ? 'w-7 h-7 text-xs' : size === 'lg' ? 'w-11 h-11 text-base' : 'w-9 h-9 text-sm'
   return <span className={`${tam} ${color} ${className} rounded-full inline-flex items-center justify-center font-bold shrink-0 select-none`}>{n.charAt(0).toUpperCase()}</span>
-}
-
-// Contenedor de diálogos: centrado en móvil como hoja inferior, y en escritorio como panel lateral (panel) o diálogo (dialogo)
-// columna: el cuerpo se reparte en una columna flex (cabecera, contenido con scroll propio, pie); fijo: ocupa casi toda la altura
-function Modal({ children, onClose, ancho = 'max-w-lg', panel = false, columna = false, fijo = false }) {
-  useEffect(() => {
-    if (!onClose) return
-    const alTeclear = (e) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', alTeclear)
-    return () => window.removeEventListener('keydown', alTeclear)
-  }, [onClose])
-  return (
-    <div className={`fixed inset-0 bg-brand-950/50 backdrop-blur-[2px] animate-fade-in flex z-50 ${panel ? 'items-end sm:items-stretch sm:justify-end' : 'items-end sm:items-center justify-center p-0 sm:p-4'}`} onClick={onClose}>
-      <div
-        className={`w-full ${ancho} bg-white shadow-pop ${columna
-          ? `flex flex-col overflow-hidden rounded-t-3xl sm:rounded-3xl animate-rise ${fijo ? 'h-[94vh]' : 'max-h-[94vh]'}`
-          : `overflow-y-auto scroll-thin ${
-            panel ? 'rounded-t-3xl sm:rounded-none sm:rounded-l-3xl max-h-[92vh] sm:max-h-none animate-rise sm:animate-slide-in' : 'rounded-t-3xl sm:rounded-3xl max-h-[92vh] animate-rise'
-          }`}`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {children}
-      </div>
-    </div>
-  )
-}
-
-function ModalHead({ children, onClose, sub }) {
-  return (
-    <div className="flex items-start justify-between gap-3 px-6 py-4 border-b border-slate-100 shrink-0 sticky top-0 bg-white/90 backdrop-blur z-10">
-      <div className="min-w-0">
-        <h2 className="font-bold text-slate-900 text-lg leading-snug break-words">{children}</h2>
-        {sub}
-      </div>
-      {onClose && <button onClick={onClose} aria-label="Cerrar" className="p-1.5 -mr-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition"><X className="w-5 h-5" /></button>}
-    </div>
-  )
 }
 
 const Cargando = ({ texto = 'Cargando…' }) => (
@@ -2683,6 +2647,7 @@ export default function App() {
   const [cambiarPass, setCambiarPass] = useState('') // '' | 'normal' | 'recuperacion'
   const [movidas, setMovidas] = useState(null) // ids de empresas con nota o cambio de estado en los últimos SIN_MOVER.dias
   const [errorCarga, setErrorCarga] = useState('')
+  const [importando, setImportando] = useState(false) // asistente de importación desde Excel (admin)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session ?? null))
@@ -3081,6 +3046,13 @@ export default function App() {
                   >
                     <FileSpreadsheet className="w-4 h-4" /><span className="hidden lg:inline">Exportar</span>
                   </button>}
+                  <button
+                    onClick={() => setImportando(true)}
+                    title="Importar empresas desde Excel"
+                    className="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-600 hover:bg-slate-50 inline-flex items-center gap-1.5 transition"
+                  >
+                    <Upload className="w-4 h-4" /><span className="hidden lg:inline">Importar</span>
+                  </button>
                 </>
               )}
             </div>
@@ -3211,6 +3183,10 @@ export default function App() {
           onRefresh={cargar}
           onClose={() => setModal(null)}
         />
+      )}
+
+      {importando && isAdmin && (
+        <ImportarEmpresas users={users} companies={companies} me={me} onClose={() => setImportando(false)} onDone={cargar} />
       )}
 
       {cambiarPass && <CambiarContrasena recuperacion={cambiarPass === 'recuperacion'} onClose={() => setCambiarPass('')} />}
