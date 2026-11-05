@@ -86,7 +86,7 @@ export default function Guia({ isAdmin }) {
           {F.listaNegra && <li><B>Lista negra:</B> empresas que no hay que volver a contactar. No salen en ningún otro apartado ni en los recordatorios.</li>}
         </Lista>
         <p>
-          En los demás apartados solo ves <B>tus</B> empresas. Usa el buscador (nombre, CIF, contacto, sector…) y los filtros por estado para encontrar una.
+          En los demás apartados solo ves <B>tus</B> empresas. Usa el buscador (nombre, teléfono, correo, CIF, contacto, web, notas…; no importan tildes ni espacios del teléfono) y los filtros por estado para encontrar una.
           Haz clic en una empresa para abrir su ficha.
         </p>
         <p><B>Qué puedes cambiar en una ficha:</B> en las empresas que llevas puedes editar persona de contacto, teléfono, email, dirección, CIF, estado, notas y próximo contacto.

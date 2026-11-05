@@ -55,6 +55,32 @@ const grupoDe = (id) => GRUPOS.find((g) => g.id === id) || GRUPOS[GRUPOS.length 
 // Los estados «oculto» ya no se pueden elegir; solo se muestran si alguna empresa sigue en ellos
 const estadoDe = (id) => ESTADOS.find((e) => e.id === id) || ESTADOS[0]
 
+// Buscador de empresas: minúsculas y sin tildes, para que «telefonica» encuentre «Telefónica»
+const sinTildes = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+const soloDigitos = (s) => String(s || '').replace(/\D/g, '')
+// Cada palabra de la búsqueda tiene que aparecer en algún campo útil de la empresa
+// (nombre, CIF, contacto, correo, teléfono, web, dirección, sector, notas, estado,
+// responsable o años de prácticas). El teléfono y el CIF se comparan sin espacios
+// ni guiones, así «600 12 34» encuentra «+34 600123456».
+const coincideEmpresa = (c, busca, nombreResp = '') => {
+  const q = sinTildes(busca).trim()
+  if (!q) return true
+  const texto = sinTildes([
+    c.nombre, c.cif, c.contacto, c.email, c.telefono, c.web, c.direccion, c.sector, c.notas,
+    estadoDe(c.estado).label, nombreResp, aniosPracticas(c.practicas),
+  ].join(' \u0001 '))
+  const tel = soloDigitos(c.telefono)
+  const cif = cifNorm(c.cif)
+  // La búsqueda completa, sin separadores, por si es un teléfono o CIF escrito con espacios
+  const qTel = soloDigitos(q)
+  if (qTel.length >= 3 && qTel.length === q.replace(/[\s+().-]/g, '').length && tel.includes(qTel)) return true
+  const qCif = cifNorm(q)
+  if (qCif.length >= 4 && cif.includes(qCif)) return true
+  return q.split(/\s+/).every((p) => texto.includes(p)
+    || (soloDigitos(p).length >= 3 && tel.includes(soloDigitos(p)))
+    || (cifNorm(p).length >= 4 && cif.includes(cifNorm(p))))
+}
+
 // Cuántas empresas sin contactar se asignan de golpe y a partir de cuántas se avisa
 const LOTE = CENTRO.lote
 const AVISO_POCAS = CENTRO.avisoPocas
@@ -2784,13 +2810,7 @@ export default function App() {
     .filter((c) => agenda || enGrupo(grupoDe(grupoEf), c, me.id, isAdmin))
     .filter((c) => !filtroEstado || c.estado === filtroEstado)
     .filter((c) => !filtroPersona || (filtroPersona === '__sin' ? !c.responsable : c.responsable === filtroPersona))
-    .filter((c) => {
-      const q = busca.toLowerCase()
-      if (!q) return true
-      const qCif = cifNorm(q)
-      return [c.nombre, c.contacto, c.sector, c.cif, c.direccion, c.email, c.responsable ? nombreDe(c.responsable) : '']
-        .some((v) => (v || '').toLowerCase().includes(q)) || (qCif.length >= 4 && cifNorm(c.cif).includes(qCif))
-    })
+    .filter((c) => coincideEmpresa(c, busca, c.responsable ? nombreDe(c.responsable) : ''))
 
   // Pestañas según las funciones activas del centro (Ajustes → Funciones)
   const NAV = [
@@ -3041,7 +3061,7 @@ export default function App() {
             <div className="flex flex-wrap sm:flex-nowrap gap-2 mb-4">
               <div className="relative flex-1 basis-full sm:basis-auto">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <Input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar empresa, CIF, contacto, sector o responsable…" className="pl-10" />
+                <Input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por nombre, teléfono, correo, CIF, contacto, web, notas…" className="pl-10" />
               </div>
               {isAdmin && (
                 <>
